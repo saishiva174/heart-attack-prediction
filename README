@@ -1,5 +1,8 @@
 # 🫀 Heart Attack Prediction & Interactive AI Diagnostics Pipeline
 
+
+live link:"https://heart-attack-prediction-theta.vercel.app/"
+
 An end-to-end, decoupled clinical diagnostic web application that predicts individual heart disease risk probability using a machine learning soft-voting ensemble model. The application features local and global algorithmic explainability via **SHAP** and **LIME** and includes an integrated medical AI chatbot powered by **LangChain Mistral AI**.
 
 ---

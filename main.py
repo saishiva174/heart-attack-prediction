@@ -41,6 +41,8 @@ app.add_middleware(
         "http://127.0.0.1:5500",
         "http://127.0.0.2:5500",
         "http://localhost:5500",
+        "https://heart-attack-prediction-theta.vercel.app/",
+        "https://heart-attack-prediction-gajjelasaishivareddy174-7608s-projects.vercel.app/"
     ],
     allow_credentials=True,
     allow_methods=["*"],
