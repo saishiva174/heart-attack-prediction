@@ -130,7 +130,8 @@ class ChatQuery(BaseModel):
 
 # --- 📡 ENDPOINT ROUTING ---
 
-@app.get("/",methods=["GET", "HEAD"])
+@app.get("/")
+@app.head("/")
 def health_check():
     return {"status": "healthy", "service": "Heart Diagnostics Pipeline Active"}
 
