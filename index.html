@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardiovascular Diagnostics Portal</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="card" style="flex: 1.2;">
+            <h2>📋 Patient Clinical Metrics</h2>
+            <div class="form-grid">
+                <div class="form-group"><label>Age (Years)</label><input type="number" id="age" value="45"></div>
+                <div class="form-group"><label>Sex</label><select id="sex"><option value="1">Male</option><option value="0">Female</option></select></div>
+                <div class="form-group"><label>Chest Pain Type</label><select id="cp"><option value="1">Typical Angina</option><option value="2">Atypical Angina</option><option value="3">Non-Anginal Pain</option><option value="4">Asymptomatic</option></select></div>
+                <div class="form-group"><label>Resting BP (mm Hg)</label><input type="number" id="rbp" value="120"></div>
+                <div class="form-group"><label>Serum Cholesterol (mg/dl)</label><input type="number" id="chol" value="220"></div>
+                <div class="form-group"><label>Fasting Blood Sugar (mg/dl)</label><input type="number" id="fbs" value="100"></div>
+                <div class="form-group"><label>Resting ECG Results</label><select id="ecg"><option value="0">Normal</option><option value="1">ST-T Abnormality</option><option value="2">Hypertrophy</option></select></div>
+                <div class="form-group"><label>Max Heart Rate Achieved</label><input type="number" id="max_hr" value="145"></div>
+                <div class="form-group"><label>Exercise Induced Angina</label><select id="ex_angina"><option value="0">No</option><option value="1">Yes</option></select></div>
+                <div class="form-group"><label>Oldpeak (ST Depression)</label><input type="number" id="oldpeak" value="1.2" step="0.1"></div>
+                <div class="form-group full-width"><label>Slope of Peak Exercise ST Segment</label><select id="slope"><option value="1">Upsloping</option><option value="2">Flat</option><option value="3">Downsloping</option></select></div>
+            </div>
+            <button class="predict-btn" onclick="requestPrediction()">Run Prediction Analysis</button>
+        </div>
+
+        <div class="card" style="flex: 1.5;">
+            <h2>📊 Diagnostic Explanations</h2>
+            <div id="resultOutput" class="result-display"></div>
+            <div id="shapVisualization" class="plot-container">
+                <h3>🔬 SHAP Feature Breakdown</h3>
+                <p style="color: #64748b; font-style: italic;">Run analysis to generate global game-theoretic feature contributions.</p>
+            </div>
+            <br>
+            <div id="limeVisualization" class="plot-container">
+                <h3>🎯 LIME Local Rule Breakdown</h3>
+                <p style="color: #64748b; font-style: italic;">Local threshold rules will generate alongside predictions.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-chat">
+        <h3>🤖 Clinical AI Assistant</h3>
+        <div class="chat-history" id="chatContainer">
+            <div class="bubble bot-bubble">Hello! Ask me why features were weighted high, or what any feature threshold signifies!</div>
+        </div>
+        <div class="chat-controls">
+            <input type="text" id="chatMessageInput" placeholder="Ask a question..." onkeypress="handleChatKeypress(event)">
+            <button onclick="dispatchChatMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // --- MULTI-ENVIRONMENT URL HANDLING ---
+        // ⚠️ Update this with your live Render app link once you deploy
+       // --- MULTI-ENVIRONMENT URL HANDLING ---
+const PRODUCTION_URL = "https://your-app-backend.onrender.com";
+const LOCAL_URL = "http://127.0.0.1:8000";
+
+// Updated fallback logic to catch alternate local loopback IPs (like 127.0.0.2)
+const BACKEND_URL = (
+    window.location.hostname === "localhost" || 
+    window.location.hostname === "127.0.0.1" || 
+    window.location.hostname === "127.0.0.2" || 
+    window.location.protocol === "file:"
+) 
+    ? LOCAL_URL 
+    : PRODUCTION_URL;
+        
+        let currentRiskPercentage = 0.0; 
+        let currentShapSummary = "No analysis executed yet.";
+        let currentLimeSummary = "No analysis executed yet.";
+        let chatHistoryArray = []; 
+
+        async function requestPrediction() {
+            const dataPayload = {
+                Age: parseFloat(document.getElementById('age').value),
+                Sex: parseInt(document.getElementById('sex').value),
+                chest_pain_type: parseInt(document.getElementById('cp').value),
+                resting_bp_s: parseFloat(document.getElementById('rbp').value),
+                cholesterol: parseFloat(document.getElementById('chol').value),
+                fasting_blood_sugar: parseFloat(document.getElementById('fbs').value),
+                resting_ecg: parseInt(document.getElementById('ecg').value),
+                max_heart_rate: parseFloat(document.getElementById('max_hr').value),
+                exercise_angina: parseInt(document.getElementById('ex_angina').value),
+                oldpeak: parseFloat(document.getElementById('oldpeak').value),
+                ST_slope: parseInt(document.getElementById('slope').value)
+            };
+
+            const displayPane = document.getElementById('resultOutput');
+            displayPane.style.display = "block";
+            displayPane.className = "result-display";
+            displayPane.innerText = "Processing clinical metrics via soft voting ensemble...";
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/predict`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dataPayload)
+                });
+                const responseData = await response.json();
+
+                currentRiskPercentage = responseData.risk_percentage;
+                currentShapSummary = responseData.shap_summary;
+                currentLimeSummary = responseData.lime_summary;
+
+                if (responseData.risk_percentage > 50) {
+                    displayPane.className = "result-display risk-high";
+                    displayPane.innerText = `⚠️ HIGH RISK: ${responseData.risk_percentage}% Probability of Heart Disease.`;
+                } else {
+                    displayPane.className = "result-display risk-normal";
+                    displayPane.innerText = `✅ NORMAL RISK: ${(100 - responseData.risk_percentage).toFixed(2)}% Stability.`;
+                }
+
+                document.getElementById('shapVisualization').innerHTML = `
+                    <h3>🔬 SHAP Feature Breakdown</h3>
+                    <img src="${responseData.shap_plot}" alt="SHAP Plot Breakdown">`;
+
+                document.getElementById('limeVisualization').innerHTML = `
+                    <h3>🎯 LIME Local Rule Breakdown</h3>
+                    <img src="${responseData.lime_plot}" alt="LIME Plot Breakdown">`;
+
+            } catch (err) {
+                displayPane.className = "result-display risk-high";
+                displayPane.innerText = "Error communicating with the backend analytics engine.";
+            }
+        }
+
+        async function dispatchChatMessage() {
+            const messageBox = document.getElementById('chatMessageInput');
+            const messageText = messageBox.value.trim();
+            if (!messageText) return;
+
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.innerHTML += `<div class="bubble user-bubble">${messageText}</div>`;
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            const trackingPayload = {
+                message: messageText,
+                history: chatHistoryArray, 
+                age: parseFloat(document.getElementById('age').value),
+                sex: parseInt(document.getElementById('sex').value),
+                chest_pain_type: parseInt(document.getElementById('cp').value),
+                resting_bp_s: parseFloat(document.getElementById('rbp').value),
+                cholesterol: parseFloat(document.getElementById('chol').value),
+                fasting_blood_sugar: parseFloat(document.getElementById('fbs').value),
+                resting_ecg: parseInt(document.getElementById('ecg').value),
+                max_heart_rate: parseFloat(document.getElementById('max_hr').value),
+                exercise_angina: parseInt(document.getElementById('ex_angina').value),
+                oldpeak: parseFloat(document.getElementById('oldpeak').value),
+                ST_slope: parseInt(document.getElementById('slope').value),
+                risk_percentage: currentRiskPercentage,
+                shap_summary: currentShapSummary,
+                lime_summary: currentLimeSummary
+            };
+
+            chatHistoryArray.push({ role: "user", text: messageText });
+            messageBox.value = "";
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/chat`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(trackingPayload)
+                });
+                const botResult = await response.json();
+                
+               const parsedHTMLHTML = marked.parse(botResult.reply);
+                 chatContainer.innerHTML += `<div class="bubble bot-bubble">${parsedHTMLHTML}</div>`;
+                chatHistoryArray.push({ role: "model", text: botResult.reply });
+            } catch (error) {
+                chatContainer.innerHTML += `<div class="bubble bot-bubble">Error parsing AI assistant data.</div>`;
+            }
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function handleChatKeypress(e) {
+            if (e.key === 'Enter') dispatchChatMessage();
+        }
+    </script>
+</body>
+</html>

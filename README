@@ -1,0 +1,71 @@
+# 🫀 Heart Attack Prediction & Interactive AI Diagnostics Pipeline
+
+An end-to-end, decoupled clinical diagnostic web application that predicts individual heart disease risk probability using a machine learning soft-voting ensemble model. The application features local and global algorithmic explainability via **SHAP** and **LIME** and includes an integrated medical AI chatbot powered by **LangChain Mistral AI**.
+
+---
+
+
+## 🚀 Key Features
+
+- **Decoupled Architecture:** Separated high-performance FastAPI Python backend engine from a lightweight, responsive HTML5/CSS3/JavaScript frontend dashboard.
+- **Ensemble Machine Learning:** Employs a robust Soft-Voting Classifier combination (including XGBoost, LightGBM, and Random Forest) to output statistical risk percentages.
+- **Explainable AI (XAI):**
+  - **SHAP Waterfall Plots:** Visualizes global feature importance to show which baseline clinical metrics heavily impacted the model's trajectory.
+  - **LIME Bar Charts:** Highlights highly specific, localized patient decision rules calibrated against true training data bounds (`lime_training_background.csv`).
+- **Context-Aware Medical AI Chatbot:** Uses LangChain with the `mistral-small-latest` model to provide patient-specific analysis of the clinical profile and XAI charts, running a rolling-window token compression algorithm to prevent rate limits.
+
+---
+
+## 📦 Project Architecture & Directory Layout
+
+```text
+heart_attack_prediction/
+│
+├── index.html                  # Frontend User Interface Dashboard
+├── style.css                   # Custom responsive UI stylesheet
+├── main.py                     # Core FastAPI backend, ML scoring & LLM pipeline
+├── heart_disease_voting_ensemble.pkl # Persisted pre-trained voting model
+├── lime_training_background.csv # Statistical sample matrix for accurate LIME rules
+├── requirements.txt            # System dependency listing (Native Python)
+└── .gitignore                  # Prevents tracking of large local environments (.venv, .env)
+🛠️ Local Installation & Setup
+1. Prerequisites
+Ensure you have Python 3.11+ installed on your local computer.
+
+2. Navigate to the Project
+Open your terminal or PowerShell window and navigate to your workspace directory:
+
+PowerShell
+cd C:\Users\gajje\OneDrive\Desktop\pro2\heart_attack_prediction
+3. Initialize & Activate the Virtual Environment
+PowerShell
+python -m venv .venv
+# On Windows PowerShell:
+.venv\Scripts\Activate.ps1
+4. Install Dependencies
+PowerShell
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+5. Configure Your Secret Environment Keys
+Create a file named exactly .env in the root directory and add your variables:
+
+Ini, TOML
+MISTRAL_API_KEY=your_actual_mistral_api_key
+PORT=8000
+HOST=127.0.0.1
+6. Run the Application Backend
+PowerShell
+python main.py
+The server will initialize locally on http://127.0.0.1:8000. You can now launch index.html using a local server extension (like VS Code Live Server) to interact with the platform!
+
+🌐 Production Cloud Deployment (Render Native Python)
+This project is fully structured to deploy natively on Render without requiring Docker containers:
+
+Backend Engine (Web Service): Create a Web Service on Render linking to your GitHub repository. Set the Runtime to Python 3, the Build Command to pip install -r requirements.txt, and the Start Command to uvicorn main:app --host 0.0.0.0 --port 10000. Add your MISTRAL_API_KEY in the Environment Variables section.
+
+Frontend UI (Static Site): Create a Static Site service on Render using the same repository. Leave the build command blank and set the publish directory to . (the root).
+
+CORS Alignment: Take the generated public live web domain from your Static Site service and append it inside the CORSMiddleware setup array block within your main.py script to authorize browser network handshakes.
+
+⚖️ Clinical Disclaimer
+This software application is a prototype demonstrating machine learning statistical predictive analysis and localized model interpretation (XAI). It is intended exclusively as an educational developer project. It is not a diagnostic medical tool, does not provide medical advice, and all generated insights must be cross-verified by a licensed healthcare professional or cardiologist.

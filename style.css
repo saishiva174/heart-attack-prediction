@@ -1,0 +1,27 @@
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f3f5; margin: 0; display: flex; height: 100vh; }
+.main-container { display: flex; width: 75%; padding: 25px; box-sizing: border-box; overflow-y: auto; gap: 25px; }
+.card { background: white; padding: 30px; border-radius: 14px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); width: 100%; }
+h2 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.form-group { display: flex; flex-direction: column; }
+.full-width { grid-column: span 2; }
+label { font-weight: 600; margin-bottom: 6px; color: #34495e; font-size: 14px; }
+input, select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; background: #f8fafc; }
+input:focus, select:focus { outline: none; border-color: #3498db; background: white; }
+button.predict-btn { background: #e74c3c; color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; transition: background 0.2s; margin-top: 15px; width: 100%; }
+button.predict-btn:hover { background: #c0392b; }
+.result-display { padding: 15px; border-radius: 8px; margin-top: 20px; text-align: center; font-size: 20px; font-weight: bold; display: none; }
+.risk-high { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
+.risk-normal { background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; }
+.plot-container img { max-width: 100%; margin-top: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }
+
+/* Chatbot Sidebar Styles */
+.sidebar-chat { width: 25%; background: #2c3e50; display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; }
+.sidebar-chat h3 { color: white; margin-top: 0; font-size: 18px; text-align: center; }
+.chat-history { flex-grow: 1; overflow-y: auto; background: #34495e; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; }
+.bubble { padding: 10px 14px; border-radius: 8px; font-size: 14px; line-height: 1.4; max-width: 85%; word-wrap: break-word; }
+.bot-bubble { background: #1abc9c; color: white; align-self: flex-start; }
+.user-bubble { background: #3498db; color: white; align-self: flex-end; }
+.chat-controls { display: flex; gap: 8px; }
+.chat-controls input { flex-grow: 1; border: none; padding: 12px; border-radius: 6px; font-size: 14px; }
+.chat-controls button { background: #1abc9c; color: white; border: none; padding: 0 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
